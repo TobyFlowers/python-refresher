@@ -24,6 +24,8 @@ def div(a, b):
 
 
 def sqrt(a):
+    if a < 0:
+        raise ValueError("Can't take sqrt of negative!")
     return np.sqrt(a)
 
 
@@ -32,6 +34,8 @@ def power(a, b):
 
 
 def log(a):
+   if a < 0:
+        raise ValueError("Can't take log of negative!")
    return np.log(a)
 
 def exp(a):
