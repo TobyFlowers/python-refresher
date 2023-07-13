@@ -1,5 +1,6 @@
 d_water = 1000  # density of water -> 1 m^3 = 1000kg
 g = 9.81  # acceleration due to gravity (m/s^2)
+pressure_at_surface = 101.325  # 1atm // 101.325 KPa
 
 
 def calculate_bouyancy(v, density_fluid):
@@ -26,4 +27,4 @@ def calculate_pressure(depth):
     calculates the pressure at any given depth in water.
     units: pascals"""
     depth = abs(depth)
-    return depth * g * d_water
+    return depth * g * d_water + pressure_at_surface
