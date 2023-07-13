@@ -14,10 +14,8 @@ def calculate_bouyancy(v, density_fluid):
     return density_fluid * g * v
 
 
-"""
-calculates if an object with a given volume and mass will float or not in water
-true/false
-"""
+"""calculates if an object with a given volume and mass will float or not in water
+true/false"""
 
 
 def will_it_float(v, mass):
