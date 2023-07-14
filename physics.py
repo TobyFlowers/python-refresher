@@ -7,6 +7,39 @@ g = 9.81  # acceleration due to gravity (m/s^2)
 pressure_at_surface = 101.325  # 1atm // 101.325 KPa
 
 
+def rotation_arr(theta):
+    # return array for global rotation array
+    arr = numpy.array(
+        [
+            [(math.cos(theta), -math.sin(theta))],
+            [(math.sin(theta), math.cos(theta))],
+        ]
+    )
+    return arr
+
+
+def rov_arr(theta):
+    # return array for ROV-centric rotation array
+    arr = numpy.array(
+        [
+            [
+                math.cos(theta),
+                math.cos(theta),
+                -math.cos(theta),
+                -math.cos(theta),
+            ],
+            [
+                math.sin(theta),
+                -math.sin(theta),
+                -math.sin(theta),
+                math.sin(theta),
+            ],
+        ]
+    )
+
+    return arr
+
+
 def calculate_bouyancy(v, density_fluid):
     """
     calculates the bouyancy of an object in any given fluid density
@@ -54,50 +87,39 @@ def calculate_moment_of_inertia(m, r):
     return m * math.pow(r, 2)
 
 
-def rotation_arr(theta):
-    arr = numpy.array(
-        [
-            [(math.cos(theta), -math.sin(theta))],
-            [(math.sin(theta), math.cos(theta))],
-        ]
-    )
-    return arr
-
-
-def rov_arr(theta):
-    arr = numpy.array(
-        [
-            [
-                math.cos(theta),
-                math.cos(theta),
-                -math.cos(theta),
-                -math.cos(theta),
-            ],
-            [
-                math.sin(theta),
-                -math.sin(theta),
-                -math.sin(theta),
-                math.sin(theta),
-            ],
-        ]
-    )
-
-    return arr
-
-
 def calculate_auv_acceleration(
     F_magnitude, F_angle, thruster_distance=0.5, mass=100, volume=0.1
 ):
-    thrusters = numpy.array(
-        [[F_magnitude], [F_magnitude], [F_magnitude], [F_magnitude]]
-    )
-    rov_rot_arr = rov_arr(F_angle)
-    forcearr = numpy.dot(rov_rot_arr, thrusters)
+    # calc the acceleration of a one-thruster robot in robot-centric space
+    thrusters = numpy.array([[-F_magnitude]])
+    rov_rot_arr = numpy.array([[math.cos(F_angle)], [math.sin(F_angle)]])
+    forcearr = numpy.matmul(rov_rot_arr, thrusters)
     accl = numpy.array([forcearr[0] / mass, forcearr[1] / mass])
-    print(thrusters)
-    print(rov_rot_arr)
-    print(forcearr)
-    print(accl)
+    return accl
 
 
-calculate_auv_acceleration(1000, (math.pi / 6))
+def calculate_auv_angular_acceleration(
+    F_magnitude, F_angle, intertia=1, thruster_distance=0.5
+):
+    # calc the acceleration of a one-thruster robot
+    return calculate_torque(F_magnitude, F_angle, thruster_distance) / intertia
+
+
+def calculate_auv2_acceleration(T, alpha, theta, mass=100):
+    # calc the acceleration of a one-thruster robot
+
+    rov_rot_arr = rov_arr(alpha)
+    forcearr = numpy.matmul(rov_rot_arr, T)
+    accl = numpy.array([forcearr[0] / mass, forcearr[1] / mass])
+    return numpy.matmul(rotation_arr(theta), accl)
+
+
+def calculate_auv2_angular_acceleration(T, alpha, L, l, inertia=100):
+    # calc the  ang acceleration of a 4-thruster robot
+
+    rov_rot_arr = rov_arr(alpha)
+    forcearr = numpy.matmul(rov_rot_arr, T)
+    accl = numpy.array([forcearr[0] / inertia, forcearr[1] / inertia])
+    r = math.sqrt(math.pow(L, 2) + math.pow(l, 2))
+    magnitude = math.sqrt(accl[0] * accl[0] + accl[1] + accl[1])
+    return calculate_torque(magnitude, alpha, r) / inertia
