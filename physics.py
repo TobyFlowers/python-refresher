@@ -185,6 +185,3 @@ def simulate_auv2_motion(
         angularVelocity,
         linearAcceleration,
     )
-
-
-print(simulate_auv2_motion(numpy.array([0, 0, 0, 0]), math.pi / 4, 3, 4))
