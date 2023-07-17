@@ -73,24 +73,24 @@ def calculate_acceleration(F, m):
 
 
 def calculate_angular_acceleration(tau, i):
-    "calcualtes the angular acceleration of an object gfiven the force applied on it and its mass"
+    """calcualtes the angular acceleration of an object gfiven the force applied on it and its mass"""
     return tau / i
 
 
 def calculate_torque(F_magnitude, F_direction, r):
-    # calculates torque given the force vector and r
+    """calculates torque given the force vector and r"""
     return r * (F_magnitude * math.sin(F_direction * math.pi / 180))
 
 
 def calculate_moment_of_inertia(m, r):
-    # calculate the moment of intertia given the distance to CoM and the mass of the object
+    """calculate the moment of intertia given the distance to CoM and the mass of the object"""
     return m * math.pow(r, 2)
 
 
 def calculate_auv_acceleration(
     F_magnitude, F_angle, thruster_distance=0.5, mass=100, volume=0.1
 ):
-    # calc the acceleration of a one-thruster robot in robot-centric space
+    """calc the acceleration of a one-thruster robot in robot-centric space"""
     thrusters = numpy.array([[-F_magnitude]])
     rov_rot_arr = numpy.array([[math.cos(F_angle)], [math.sin(F_angle)]])
     forcearr = numpy.matmul(rov_rot_arr, thrusters)
@@ -101,12 +101,12 @@ def calculate_auv_acceleration(
 def calculate_auv_angular_acceleration(
     F_magnitude, F_angle, intertia=1, thruster_distance=0.5
 ):
-    # calc the acceleration of a one-thruster robot
+    """calc the acceleration of a one-thruster robot"""
     return calculate_torque(F_magnitude, F_angle, thruster_distance) / intertia
 
 
 def calculate_auv2_acceleration(T, alpha, theta, mass=100):
-    # calc the acceleration of a one-thruster robot
+    """calc the acceleration of a one-thruster robot"""
 
     rov_rot_arr = rov_arr(alpha)
     forcearr = numpy.matmul(rov_rot_arr, T)
@@ -115,7 +115,7 @@ def calculate_auv2_acceleration(T, alpha, theta, mass=100):
 
 
 def calculate_auv2_angular_acceleration(T, alpha, L, l, inertia=100):
-    # calc the  ang acceleration of a 4-thruster robot
+    """calc the  ang acceleration of a 4-thruster robot"""
 
     rov_rot_arr = rov_arr(alpha)
     forcearr = numpy.matmul(rov_rot_arr, T)
