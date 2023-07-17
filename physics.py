@@ -116,8 +116,8 @@ def calculate_auv2_acceleration(T, alpha, theta, mass=100):
 
 def calculate_auv2_angular_acceleration(T, alpha, L, l, inertia=100):
     """calc the  ang acceleration of a 4-thruster robot"""
-
-    rov_rot_arr = rov_arr(alpha)
+    beta = numpy.arctan(L / l)
+    rov_rot_arr = rov_arr(alpha + beta)
     forcearr = numpy.matmul(rov_rot_arr, T)
     accl = numpy.array([forcearr[0] / inertia, forcearr[1] / inertia])
     r = math.sqrt(math.pow(L, 2) + math.pow(l, 2))
