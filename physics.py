@@ -121,5 +121,5 @@ def calculate_auv2_angular_acceleration(T, alpha, L, l, inertia=100):
     forcearr = numpy.matmul(rov_rot_arr, T)
     accl = numpy.array([forcearr[0] / inertia, forcearr[1] / inertia])
     r = math.sqrt(math.pow(L, 2) + math.pow(l, 2))
-    magnitude = math.sqrt(accl[0] * accl[0] + accl[1] + accl[1])
+    magnitude = math.sqrt(accl[0] * accl[0] * accl[1] + accl[1])
     return calculate_torque(magnitude, alpha, r) / inertia
