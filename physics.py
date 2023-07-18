@@ -115,15 +115,15 @@ def calculate_auv2_acceleration(T, alpha, theta, mass=100):
 
 
 def calculate_auv2_angular_acceleration(T, alpha, L, l, inertia=100):
-    T = numpy.matmul(numpy.array([1, -1, 1, -1]), T.T)
-    """calc the  ang acceleration of a 4-thruster robot"""
     beta = numpy.arctan(L / l)
-    rov_rot_arr = rov_arr(alpha + beta)
-    forcearr = numpy.matmul(rov_rot_arr, T.T)
-    accl = numpy.array([forcearr[0] / inertia, forcearr[1] / inertia])
-    r = math.sqrt(math.pow(L, 2) + math.pow(l, 2))
-    magnitude = math.sqrt(numpy.power(accl[0], 2) + numpy.power(accl[1], 2))
-    return calculate_torque(magnitude, alpha, r) / inertia
+    translation_array = numpy.array([1, -1, 1, -1]).T
+    f = numpy.dot(translation_array, T)
+    return (
+        numpy.sin(alpha + beta)
+        * numpy.sqrt(numpy.power(l, 2) + numpy.power(L, 2))
+        * f
+        / inertia
+    )
 
 
 def simulate_auv2_motion(
@@ -152,13 +152,13 @@ def simulate_auv2_motion(
         aaccel = calculate_auv2_angular_acceleration(T, alpha, L, l, inertia)
         linearAcceleration[i] = laccel.T
         angularAcceleration[i] = aaccel
-
+        print(angularAcceleration[i])
         # CALCULATING VELOCITY MATRICES
 
         l_velocity = numpy.array(
             [
-                [linearAcceleration[i - 1][0] + linearAcceleration[i][0] * dt],
-                [linearAcceleration[i - 1][1] + linearAcceleration[i][1] * dt],
+                [linearVelocity[i - 1][0] + linearAcceleration[i - 1][0] * dt],
+                [linearVelocity[i - 1][1] + linearAcceleration[i - 1][1] * dt],
             ]
         )
 
@@ -168,15 +168,11 @@ def simulate_auv2_motion(
         angularVelocity[i] = a_velocity
 
         # CALCULATING POSITION MATRICIES
-        linearDisplacementX[i] = (
-            0.5 * laccel[0] * math.pow(dt, 2) + linearDisplacementX[i - 1] * time[i]
-        )
-        linearDisplacementY[i] = (
-            0.5 * laccel[1] * math.pow(dt, 2) + linearDisplacementY[i - 1] * time[i]
-        )
-        angularDisplacement[i] = (
-            0.5 * aaccel * math.pow(dt, 2) + angularDisplacement[i - 1] * time[i]
-        )
+        linearDisplacementX[i] = linearDisplacementX[i - 1] + l_velocity[0] * dt
+        linearDisplacementY[i] = linearDisplacementY[i - 1] + l_velocity[1] * dt
+        angularDisplacement[i] = angularDisplacement[i - 1] + a_velocity * dt
+
+        theta = angularDisplacement[i]
 
     return (
         time,
@@ -189,15 +185,4 @@ def simulate_auv2_motion(
     )
 
 
-# simulate_auv2_motion(numpy.array([10, 10, 5, 3]), numpy.pi / 4, 2, 2, t_final=4)
-
-print(
-    calculate_auv2_acceleration(
-        numpy.array([10, 10, 5, 3]), numpy.pi / 4, numpy.pi / 4, mass=100
-    )
-)
-
-
-print(
-    calculate_auv2_angular_acceleration(numpy.array([10, 10, 5, 3]), numpy.pi / 4, 3, 4)
-)
+simulate_auv2_motion(numpy.array([10, 10, 5, 3]), numpy.pi / 4, 2, 2, t_final=4)
