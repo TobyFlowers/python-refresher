@@ -115,13 +115,14 @@ def calculate_auv2_acceleration(T, alpha, theta, mass=100):
 
 
 def calculate_auv2_angular_acceleration(T, alpha, L, l, inertia=100):
+    T = numpy.matmul(numpy.array([1, -1, 1, -1]), T.T)
     """calc the  ang acceleration of a 4-thruster robot"""
-    beta = numpy.arctan(l / L)
+    beta = numpy.arctan(L / l)
     rov_rot_arr = rov_arr(alpha + beta)
-    forcearr = numpy.matmul(rov_rot_arr, T)
+    forcearr = numpy.matmul(rov_rot_arr, T.T)
     accl = numpy.array([forcearr[0] / inertia, forcearr[1] / inertia])
     r = math.sqrt(math.pow(L, 2) + math.pow(l, 2))
-    magnitude = math.sqrt(accl[0] * accl[0] * accl[1] + accl[1])
+    magnitude = math.sqrt(numpy.power(accl[0], 2) + numpy.power(accl[1], 2))
     return calculate_torque(magnitude, alpha, r) / inertia
 
 
@@ -157,9 +158,10 @@ def simulate_auv2_motion(
         l_velocity = numpy.array(
             [
                 [linearAcceleration[i - 1][0] + linearAcceleration[i][0] * dt],
-                [linearAcceleration[i - 1][0] + linearAcceleration[i][1] * dt],
+                [linearAcceleration[i - 1][1] + linearAcceleration[i][1] * dt],
             ]
         )
+
         a_velocity = a_velocity + (angularAcceleration[i]) * dt
 
         linearVelocity[i] = l_velocity.T
@@ -185,3 +187,17 @@ def simulate_auv2_motion(
         angularVelocity,
         linearAcceleration,
     )
+
+
+# simulate_auv2_motion(numpy.array([10, 10, 5, 3]), numpy.pi / 4, 2, 2, t_final=4)
+
+print(
+    calculate_auv2_acceleration(
+        numpy.array([10, 10, 5, 3]), numpy.pi / 4, numpy.pi / 4, mass=100
+    )
+)
+
+
+print(
+    calculate_auv2_angular_acceleration(numpy.array([10, 10, 5, 3]), numpy.pi / 4, 3, 4)
+)
