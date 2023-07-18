@@ -139,12 +139,9 @@ def simulate_auv2_motion(
     linearDisplacementY = numpy.zeros_like(time)
     angularDisplacement = numpy.zeros_like(time)
     theta = theta0
-    l_velocity = numpy.zeros(shape=(len(time), 2))
-    a_velocity = 0
     angularDisplacement[0] = theta0
     linearDisplacementX[0] = x0
     linearDisplacementY[0] = y0
-    theta = theta0
 
     for i in range(1, len(time)):
         # CALCULATING ACCELERATION MATRICIES
@@ -152,27 +149,24 @@ def simulate_auv2_motion(
         aaccel = calculate_auv2_angular_acceleration(T, alpha, L, l, inertia)
         linearAcceleration[i] = laccel.T
         angularAcceleration[i] = aaccel
-        print(angularAcceleration[i])
-        # CALCULATING VELOCITY MATRICES
 
-        l_velocity = numpy.array(
+        # CALCULATE VELOCITY MATRICIES
+        linearVelocity[i] = numpy.array(
             [
-                [linearVelocity[i - 1][0] + linearAcceleration[i - 1][0] * dt],
-                [linearVelocity[i - 1][1] + linearAcceleration[i - 1][1] * dt],
+                linearAcceleration[i][0] * dt + linearVelocity[i - 1][0],
+                linearAcceleration[i][1] * dt + linearVelocity[i - 1][1],
             ]
         )
 
-        a_velocity = a_velocity + (angularAcceleration[i]) * dt
+        angularVelocity[i] = angularAcceleration[i] * dt + angularVelocity[i - 1]
 
-        linearVelocity[i] = l_velocity.T
-        angularVelocity[i] = a_velocity
+        # CALCULATE POSITION MATRICIES
 
-        # CALCULATING POSITION MATRICIES
-        linearDisplacementX[i] = linearDisplacementX[i - 1] + l_velocity[0] * dt
-        linearDisplacementY[i] = linearDisplacementY[i - 1] + l_velocity[1] * dt
-        angularDisplacement[i] = angularDisplacement[i - 1] + a_velocity * dt
+        linearDisplacementX[i] = linearDisplacementX[i - 1] + linearVelocity[i][0] * dt
+        linearDisplacementY[i] = linearDisplacementY[i - 1] + linearVelocity[i][1] * dt
+        angularDisplacement[i] = angularDisplacement[i - 1] + angularVelocity[i] * dt
 
-        theta = angularDisplacement[i]
+        theta += angularDisplacement[i]
 
     return (
         time,
@@ -185,4 +179,4 @@ def simulate_auv2_motion(
     )
 
 
-simulate_auv2_motion(numpy.array([10, 10, 5, 3]), numpy.pi / 4, 2, 2, t_final=4)
+#print(simulate_auv2_motion(numpy.array([100, 100, 50, 30]), numpy.pi / 4, 0.2, 0.2))
